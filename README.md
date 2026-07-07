@@ -1,105 +1,140 @@
-# Arduino Battery Management System (BMS)
+# Battery Management System (BMS) using Arduino/ESP32
 
-This project is an Arduino-based Battery Management System (BMS) that monitors battery voltage, calculates battery percentage, and manages charging operations. It includes features such as an LCD display, MQTT communication, and Bluetooth-based manual control.
+An embedded Battery Management System (BMS) prototype designed for a 12V lead-acid battery pack. The system performs real-time battery voltage monitoring, State-of-Charge (SoC) estimation, and intelligent charging control using Arduino/ESP32.
+
+The project integrates voltage sensing, IoT-based monitoring using MQTT, LCD visualization, and Bluetooth-enabled manual control to improve battery safety and reliability.
+
+---
 
 ## Features
 
-1. **Battery Monitoring**:
+### Battery Monitoring
+- Measures battery voltage using a voltage divider-based sensing circuit.
+- Processes analog sensor readings through the microcontroller ADC.
+- Estimates battery State-of-Charge (SoC) using voltage-based calculation.
 
-- Reads battery voltage using an analog pin.
-- Calculates battery percentage based on predefined voltage thresholds.
+### Automated Charging Control
+- Implemented finite state-machine based charging logic.
+- Automatically disables charging when battery voltage reaches full capacity (~14.4V).
+- Re-enables charging when battery percentage drops below the safe threshold.
+- Prevents overcharging and enhances battery lifespan.
 
-2. **LCD Display**:
-  - Displays the current battery voltage and percentage.
+### LCD Display Interface
+- Displays real-time battery parameters:
+  - Battery Voltage
+  - Battery Percentage (SoC)
+  - Charging Status
 
-3. **MQTT Communication**:
-  - Publishes battery voltage and percentage to an MQTT broker.
-  - Subscribes to commands for controlling the charging system.
+### IoT Monitoring using MQTT
+- Publishes battery voltage and SoC data to an MQTT broker.
+- Enables remote battery monitoring.
+- Supports wireless command-based charging control.
 
-4. **Bluetooth Control**:
-  - Allows manual control of the charging system via Bluetooth commands.
+### Bluetooth Manual Control
+Supports manual operation using Bluetooth commands:
 
-5. **Automatic Charging Control**:
-  - Disables charging when the battery is fully charged (voltage >= 14.4V).
-  - Enables charging when the battery percentage is less than or equal to 15%.
+| Command | Function |
+|---------|----------|
+| 1 | Enable Charging |
+| 0 | Disable Charging |
+| 3 | Switch to Automatic Mode |
 
-6. **Wi-Fi Connectivity**:
-  - Connects to a Wi-Fi network for MQTT communication.
-  - Includes a reconnect mechanism for maintaining Wi-Fi connectivity.
+### Connectivity Indicators
+- LED indication for:
+  - Wi-Fi connection status
+  - MQTT connection status
 
-7. **LED Indicators**:
-  - Indicates Wi-Fi and MQTT connection status using LEDs.
+---
 
-## Main Loop Functionality
+## System Workflow
 
-The main loop performs the following tasks:
+1. Battery voltage is measured using the voltage divider circuit.
+2. ESP32/Arduino reads voltage through ADC.
+3. Battery State-of-Charge (SoC) is calculated.
+4. Data is displayed on the LCD interface.
+5. Battery parameters are transmitted using MQTT.
+6. Charging is controlled automatically or manually.
 
-1. Reads the battery voltage and calculates the battery percentage.
-2. Updates the LCD display with the current voltage and battery percentage.
-3. Publishes the voltage and battery percentage to an MQTT topic if the client is connected.
-4. Processes Bluetooth commands to manually enable or disable charging, or switch to automatic mode.
-5. Implements automatic charging control based on battery voltage and percentage.
+---
 
-### Automatic Mode Behavior
+## Hardware Components
 
-- **Charging Disabled**: When the battery is fully charged (voltage >= 14.4V).
-- **Charging Enabled**: When the battery percentage is less than or equal to 15%.
+- ESP32 / Arduino Microcontroller
+- 12V Lead-Acid Battery
+- Voltage Divider Circuit
+- Relay Based Charging Control Circuit
+- I2C LCD Display
+- Bluetooth Module (HC-05)
+- Status Indicator LEDs
 
-### Manual Mode Behavior
-
-- **Enable Charging**: Bluetooth command `1`.
-- **Disable Charging**: Bluetooth command `0`.
-- **Switch to Automatic Mode**: Bluetooth command `3`.
-
-## Hardware Requirements
-
-- Arduino board (e.g., ESP32).
-- LCD with I2C interface.
-- Wi-Fi module (built-in for ESP32).
-- Bluetooth module (e.g., HC-05).
-- Voltage divider circuit for battery voltage measurement.
-- LEDs for Wi-Fi and MQTT status indicators.
+---
 
 ## Software Requirements
 
-- Arduino IDE.
-- Libraries:
-  - `Wire.h`
-  - `LiquidCrystal_I2C.h`
-  - `WiFi.h`
-  - `PubSubClient.h`
+### Development Environment
+- Arduino IDE
 
-## Wiring Diagram
+### Libraries Used
+- Wire.h
+- LiquidCrystal_I2C.h
+- WiFi.h
+- PubSubClient.h
 
-- **Battery Voltage Measurement**: Connect the battery to the analog pin through a voltage divider circuit.
-- **LCD**: Connect the LCD to the I2C pins (SDA and SCL).
-- **Wi-Fi and Bluetooth**: Use the appropriate pins for communication.
+---
 
-## Usage
+## Charging Control Logic
 
-1. Configure the Wi-Fi credentials and MQTT broker details in the code.
-2. Upload the code to the Arduino board.
-3. Monitor the battery status on the LCD display.
-4. Use an MQTT client to send commands or monitor data.
-5. Use a Bluetooth terminal to send manual control commands.
+### Automatic Mode
 
-## Bluetooth Commands
+Charging is disabled when:
 
-- `1`: Enable charging (manual mode).
-- `0`: Disable charging (manual mode).
-- `3`: Switch to automatic mode.
+Battery Voltage >= 14.4V
 
-## MQTT Topics
+The battery is detected as fully charged and charging is stopped.
 
-- **Data Topic**: Publishes battery voltage and percentage.
-- **Command Topic**: Subscribes to commands for controlling the charging system.
+Charging resumes when:
 
-## Notes
+Battery Percentage <= 15%
 
-- Ensure the voltage divider circuit is correctly configured to avoid damaging the analog pin.
-- Adjust the voltage thresholds (`minVoltage12V` and `maxVoltage12V`) based on your battery specifications.
-- Use appropriate resistor values for the voltage divider to ensure accurate readings.
+This ensures safe battery operation and prevents deep discharge conditions.
 
-## License
+---
 
-This project is open-source and available under the MIT License.
+## Circuit Implementation
+
+### Voltage Sensing
+
+- Battery voltage is reduced using a resistor-based voltage divider circuit.
+- The reduced voltage is supplied to the microcontroller ADC pin.
+- Actual battery voltage is calculated using the voltage divider ratio.
+
+### Communication
+
+- MQTT protocol enables IoT-based remote monitoring.
+- Bluetooth communication provides manual charging control.
+
+---
+
+## Applications
+
+- Electric Vehicle Battery Monitoring
+- Renewable Energy Storage Systems
+- UPS Battery Management
+- Embedded Power Monitoring Systems
+
+---
+
+## Future Improvements
+
+- Integration of current sensing for Coulomb counting based SoC estimation.
+- State-of-Health (SoH) monitoring.
+- Active/passive cell balancing implementation.
+- CAN communication support for EV applications.
+
+---
+
+## Safety Considerations
+
+- Use suitable resistor values for voltage divider design.
+- Ensure ADC input voltage stays within microcontroller limits.
+- Adjust charging thresholds according to battery specifications.
